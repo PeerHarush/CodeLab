@@ -19,10 +19,9 @@
     border: none;
     cursor: pointer;
     width: 200px;
-    transition: background-color 0.3s ease;
   }
   
-  .lobby-button:hover {
+  button:hover {
     background-color: #1c5e77;
   }
   
@@ -32,11 +31,42 @@
   font-size: 18px;
 
 }
-
-
 .userAnswer-text{
   resize: none;
   width: 40%; 
   height: 150px;
   font-size: 18px;
 }
+.bottom-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+  align-items: center;
+}
+
+.user-counter {
+  background-color: #c1d5df;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 25px;
+  font-weight: bold;
+  color: #333;
+
+}
+
+h1{
+  margin-bottom: 0%;
+}
+
+
+.smiley-image, .tryagain-image {
+  width: 100px;      /* גודל קבוע */
+  height: auto;      /* שמירת יחס גובה-רוחב */
+  display: block;    /* כדי לשלוט בקלות */
+  margin: 0 auto 20px auto;  /* מרווח מתחת והמרה לאמצע */
+}
+
