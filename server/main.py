@@ -3,7 +3,8 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
 from firebase_admin import credentials, firestore
-import asyncio  # נוסיף את זה!
+import asyncio
+import json  # חדש! נוסיף בשביל לקרוא הודעות JSON
 
 app = FastAPI()
 
@@ -17,6 +18,12 @@ app.add_middleware(
 
 connections = {}
 
+async def broadcast_students_count(code_block_id):
+    if code_block_id in connections:
+        message = {"students": len(connections[code_block_id])}
+        for ws in connections[code_block_id]:
+            await ws.send_json(message)
+
 @app.websocket("/ws/{code_block_id:path}")
 async def websocket_endpoint(websocket: WebSocket, code_block_id: str):
     await websocket.accept()
@@ -26,18 +33,35 @@ async def websocket_endpoint(websocket: WebSocket, code_block_id: str):
 
     connections[code_block_id].append(websocket)
 
-    if len(connections[code_block_id]) == 1:
-        await websocket.send_text("mentor")
-    else:
-        await websocket.send_text("student")
-
     try:
+        await broadcast_students_count(code_block_id)
+
+        if len(connections[code_block_id]) == 1:
+            await websocket.send_json({"role": "mentor"})
+        else:
+            await websocket.send_json({"role": "student"})
+
         while True:
-            await asyncio.sleep(1)  # החזקה של החיבור בלי ליפול
+            data = await websocket.receive_text()
+            try:
+                message = json.loads(data)
+                if message.get("action") == "mentor_left":
+                    # שלח לכל הסטודנטים שיעברו ללובי
+                    for ws in connections[code_block_id]:
+                        if ws != websocket:
+                            await ws.send_json({"action": "mentor_left"})
+                    connections[code_block_id].clear()
+                    break  # מנתק את המנטור עצמו גם כן
+            except Exception as e:
+                print(f"Error handling websocket message: {e}")
+
     except WebSocketDisconnect:
-        connections[code_block_id].remove(websocket)
-        if not connections[code_block_id]:
-            del connections[code_block_id]
+        if code_block_id in connections and websocket in connections[code_block_id]:
+            connections[code_block_id].remove(websocket)
+            if not connections[code_block_id]:
+                del connections[code_block_id]
+            else:
+                await broadcast_students_count(code_block_id)
 
 # FIREBASE setup
 cred = credentials.Certificate("serviceAccountKey.json")

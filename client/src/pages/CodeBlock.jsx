@@ -13,7 +13,8 @@ function CodeBlock() {
   const [userAnswer, setUserAnswer] = useState('');
   const [showSmiley, setShowSmiley] = useState(false);
   const [showTryAgain, setShowTryAgain] = useState(false);
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState('');
+  const [studentsCount, setStudentsCount] = useState(0);
 
   useEffect(() => {
     async function fetchBlock() {
@@ -28,35 +29,41 @@ function CodeBlock() {
         console.log("No such document!");
       }
     }
-
     fetchBlock();
   }, [id]);
 
   useEffect(() => {
-    const newSocket = new WebSocket(`ws://localhost:8000/ws/${id}`);
-    setSocket(newSocket);
+    const socket = new WebSocket(`ws://localhost:8000/ws/${id}`);
+    setSocket(socket);
 
-    newSocket.onopen = () => {
+    socket.onopen = () => {
       console.log("Connected to WebSocket server");
     };
 
-    newSocket.onmessage = (event) => {
-      console.log("Received from server:", event.data);
-      if (event.data === "mentor") {
-        setRole("Mentor");
-      } else if (event.data === "student") {
-        setRole("Student");
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.role) {
+        setRole(data.role === "mentor" ? "Mentor" : "Student");
+      }
+
+      if (data.students !== undefined) {
+        setStudentsCount(data.students);
+      }
+
+      if (data.action === "mentor_left") {
+        navigate('/');
       }
     };
 
-    newSocket.onclose = () => {
+    socket.onclose = () => {
       console.log("WebSocket disconnected");
     };
 
     return () => {
-      newSocket.close();
+      socket.close();
     };
-  }, [id]);
+  }, [id, navigate]);
 
   const handleCheckAnswer = async () => {
     const response = await fetch("http://localhost:8000/check-answer", {
@@ -83,6 +90,15 @@ function CodeBlock() {
     }
   };
 
+  const handleBackToLobby = () => {
+    if (role === "Mentor" && socket) {
+      socket.send(JSON.stringify({ action: "mentor_left" }));
+      navigate('/');
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
     <div className="lobby-container">
       <h1>Code Block: {currentBlock?.title}</h1>
@@ -93,15 +109,11 @@ function CodeBlock() {
 
       <textarea className="question-text" value={questionText} readOnly />
       <textarea
-      
-      className="userAnswer-text"
-      value={userAnswer}
-      onChange={(e) => setUserAnswer(e.target.value)}
-      readOnly={role === "Mentor"}
-      
-    />
-
-
+        className="userAnswer-text"
+        value={userAnswer}
+        onChange={(e) => setUserAnswer(e.target.value)}
+        readOnly={role === "Mentor"}
+      />
 
       {role === "Student" && (
         <button className="answer-check" onClick={handleCheckAnswer}>
@@ -110,8 +122,10 @@ function CodeBlock() {
       )}
 
       <div className="bottom-bar">
-        <div className="user-counter">Users Online: </div>
-        <button onClick={() => navigate('/')} className="lobby-button">
+        <div className="user-counter">
+          Users Online: {studentsCount}
+        </div>
+        <button onClick={handleBackToLobby} className="lobby-button">
           Back to Lobby
         </button>
       </div>
