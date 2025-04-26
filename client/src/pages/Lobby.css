@@ -64,9 +64,9 @@ h1{
 
 
 .smiley-image, .tryagain-image {
-  width: 100px;      /* גודל קבוע */
-  height: auto;      /* שמירת יחס גובה-רוחב */
-  display: block;    /* כדי לשלוט בקלות */
-  margin: 0 auto 20px auto;  /* מרווח מתחת והמרה לאמצע */
+  width: 100px;     
+  height: auto;      
+  display: block;    
+  margin: 0 auto 10px auto;  
 }
 
