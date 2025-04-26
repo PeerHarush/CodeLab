@@ -27,16 +27,25 @@
   
 .question-text{
   resize: none;
-  width: 40%; 
+  width: 595px; 
   font-size: 18px;
-
+  padding: 10px;
+  border: 1px solid #ccc;
 }
-.userAnswer-text{
+.userAnswer-editor {
   resize: none;
-  width: 40%; 
+  width: 616px; 
   height: 150px;
   font-size: 18px;
+  background-color: #f5f5f5;
+  font-family: monospace;
+  border: 1px solid #ccc;
+
 }
+.userAnswer-editor pre {
+  padding: 10px;
+}
+
 .bottom-bar {
   position: fixed;
   bottom: 20px;

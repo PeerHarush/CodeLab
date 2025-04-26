@@ -3,6 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './Lobby.css';
 import { doc, getDoc } from 'firebase/firestore';
 import db from '../firebase';
+import Editor from "react-simple-code-editor";
+import Prism from "prismjs";
+import "prismjs/themes/prism.css"; 
+import "prismjs/components/prism-javascript"; 
+
 
 function CodeBlock() {
   const { id } = useParams();
@@ -108,12 +113,16 @@ function CodeBlock() {
       {showTryAgain && <img src="/Mistake.png" alt="Try Again!" className="tryagain-image" />}
 
       <textarea className="question-text" value={questionText} readOnly />
-      <textarea
-        className="userAnswer-text"
+      <Editor className='userAnswer-editor'
         value={userAnswer}
-        onChange={(e) => setUserAnswer(e.target.value)}
+        onValueChange={code => setUserAnswer(code)}
+        highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
         readOnly={role === "Mentor"}
+        style={{
+          padding: "10px",
+        }}
       />
+
 
       {role === "Student" && (
         <button className="answer-check" onClick={handleCheckAnswer}>
@@ -123,7 +132,7 @@ function CodeBlock() {
 
       <div className="bottom-bar">
         <div className="user-counter">
-          Users Online: {studentsCount}
+          Users Online: {studentsCount-1}
         </div>
         <button onClick={handleBackToLobby} className="lobby-button">
           Back to Lobby
