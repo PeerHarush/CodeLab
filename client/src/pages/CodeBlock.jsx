@@ -93,14 +93,21 @@ function CodeBlock() {
 
       <textarea className="question-text" value={questionText} readOnly />
       <textarea
-        className="userAnswer-text"
-        value={userAnswer}
-        onChange={(e) => setUserAnswer(e.target.value)}
-      />
+      
+      className="userAnswer-text"
+      value={userAnswer}
+      onChange={(e) => setUserAnswer(e.target.value)}
+      readOnly={role === "Mentor"}
+      
+    />
 
-      <button className="answer-check" onClick={handleCheckAnswer}>
-        Check My Answer
-      </button>
+
+
+      {role === "Student" && (
+        <button className="answer-check" onClick={handleCheckAnswer}>
+          Check My Answer
+        </button>
+      )}
 
       <div className="bottom-bar">
         <div className="user-counter">Users Online: </div>

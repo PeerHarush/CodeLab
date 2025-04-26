@@ -48,7 +48,7 @@ class AnswerRequest(BaseModel):
     question_name: str
     user_code: str
 
-@app.post/che("ck-answer")
+@app.post("/check-answer")
 async def check_answer(request: AnswerRequest):
     doc_ref = db.collection("code_blocks").document(request.question_name)
     doc = doc_ref.get()
