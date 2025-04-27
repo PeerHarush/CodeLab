@@ -3,3 +3,4 @@ uvicorn
 python-socketio
 aiofiles
 pydantic
+firebase-admin
