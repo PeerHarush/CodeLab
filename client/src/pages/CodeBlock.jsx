@@ -41,57 +41,59 @@ function CodeBlock() {
   }, [id]);
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://localhost:8000/ws/${id}`);
-    setSocket(socket);
-  // Open and save WebSocket connection to the server using the code block ID.
-
-    socket.onopen = () => {
+    // Open and save WebSocket connection to the server using the code block ID.
+    const newSocket = new WebSocket(`wss://codelab-1-0mmncerendn.onrender.com/ws/${id}`);
+  
+    newSocket.onopen = () => {
       console.log("Connected to WebSocket server");
+      setSocket(newSocket);   // Save the socket after successful connection
     };
-
-    socket.onmessage = (event) => {
+  
+    newSocket.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
+  
       if (data.role) {
-                // Set the user role (Mentor or Student) based on the data received from the server.
+        // Set the user role (Mentor or Student) based on the data received from the server.
         if (data.role === "mentor") {
           setRole("Mentor");
         } else {
           setRole("Student");
         }
       }
-
+  
       if (data.students !== undefined) {
         setStudentsCount(data.students);
+        // Update the number of connected students.
       }
-            // Update the number of connected students.
-
-
+  
       if (data.action === "mentor_left") {
         navigate('/');
-              // If the mentor left, navigate back to the lobby.
-
+        // If the mentor left, navigate back to the lobby.
       }
+  
       if (data.action === "update_all_codes") {
         setStudentsCodes(data.codes || {});
       }
+  
       if (data.student_id) {
         setStudentId(data.student_id); 
       }
-      
     };
-
-    socket.onclose = () => {
+  
+    newSocket.onclose = () => {
       console.log("WebSocket disconnected");
     };
-
+  
     return () => {
-      socket.close();
+      // Close the WebSocket connection if it's still open when the component unmounts
+      if (newSocket && (newSocket.readyState === WebSocket.OPEN || newSocket.readyState === WebSocket.CONNECTING)) {
+        newSocket.close();
+      }
     };
   }, [id, navigate]);
-
+  
   const handleCheckAnswer = async () => {
-    const response = await fetch("http://localhost:8000/check-answer", {
+    const response = await fetch("https://codelab-1-0mmncerendn.onrender.com/check-answer", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

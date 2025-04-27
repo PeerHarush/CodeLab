@@ -131,3 +131,7 @@ async def check_answer(request: AnswerRequest):
             # solution (ignoring spaces), return correct.
     else:
         return {"result": "incorrect"}
+
+@app.get("/")
+def read_root():
+    return {"message": "Server is up and running!"}
