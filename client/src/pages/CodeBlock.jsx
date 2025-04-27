@@ -22,9 +22,9 @@ function CodeBlock() {
   const [studentsCount, setStudentsCount] = useState(0);
   const [studentsCodes, setStudentsCodes] = useState({});   // Dictionary to store all students' code answers.
   const [studentId, setStudentId] = useState('');
-  
+
   useEffect(() => {
-   // Fetching data and setting question data from Firestore when the page loads
+    // Fetching data and setting question data from Firestore when the page loads
     async function fetchBlock() {
       const docRef = doc(db, "code_blocks", id);
       const docSnap = await getDoc(docRef);
@@ -41,59 +41,55 @@ function CodeBlock() {
   }, [id]);
 
   useEffect(() => {
-    // Open and save WebSocket connection to the server using the code block ID.
-    const newSocket = new WebSocket(`wss://codelab-1-0mmncerendn.onrender.com/ws/${id}`);
-  
+    const newSocket = new WebSocket(`wss://codelab-1-0fmm.onrender.com/ws/${id}`);
+
     newSocket.onopen = () => {
       console.log("Connected to WebSocket server");
-      setSocket(newSocket);   // Save the socket after successful connection
+      setSocket(newSocket);
     };
-  
+
     newSocket.onmessage = (event) => {
+      console.log('Message from server:', event.data); 
       const data = JSON.parse(event.data);
-  
+
       if (data.role) {
-        // Set the user role (Mentor or Student) based on the data received from the server.
         if (data.role === "mentor") {
           setRole("Mentor");
         } else {
           setRole("Student");
         }
       }
-  
+
       if (data.students !== undefined) {
         setStudentsCount(data.students);
-        // Update the number of connected students.
       }
-  
+
       if (data.action === "mentor_left") {
         navigate('/');
-        // If the mentor left, navigate back to the lobby.
       }
-  
+
       if (data.action === "update_all_codes") {
         setStudentsCodes(data.codes || {});
       }
-  
+
       if (data.student_id) {
-        setStudentId(data.student_id); 
+        setStudentId(data.student_id);
       }
     };
-  
+
     newSocket.onclose = () => {
       console.log("WebSocket disconnected");
     };
-  
+
     return () => {
-      // Close the WebSocket connection if it's still open when the component unmounts
       if (newSocket && (newSocket.readyState === WebSocket.OPEN || newSocket.readyState === WebSocket.CONNECTING)) {
         newSocket.close();
       }
     };
   }, [id, navigate]);
-  
+
   const handleCheckAnswer = async () => {
-    const response = await fetch("https://codelab-1-0mmncerendn.onrender.com/check-answer", {
+    const response = await fetch("https://codelab-1-0fmm.onrender.com/check-answer", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -103,8 +99,7 @@ function CodeBlock() {
         user_code: userAnswer
       })
     });
-      // Send the user's answer to the server to check correctness.
-
+    // Send the user's answer to the server to check correctness.
 
     const data = await response.json();
 
@@ -112,7 +107,7 @@ function CodeBlock() {
       setShowSmiley(true);
       setShowTryAgain(false);
       setTimeout(() => setShowSmiley(false), 4000);
-          // Show a smiley for 4 seconds if correct.
+      // Show a smiley for 4 seconds if correct.
     } else {
       setShowSmiley(false);
       setShowTryAgain(true);
@@ -123,7 +118,7 @@ function CodeBlock() {
   const handleBackToLobby = () => {
     if (role === "Mentor" && socket) {
       socket.send(JSON.stringify({ action: "mentor_left" }));
-          // If user is mentor, notify others before leaving.
+      // If user is mentor, notify others before leaving.
       navigate('/');
     } else {
       navigate('/');
@@ -139,7 +134,8 @@ function CodeBlock() {
       {showTryAgain && <img src="/Mistake.png" alt="Try Again!" className="tryagain-image" />}
 
       <textarea className="question-text" value={questionText} readOnly />
-          {/* Display the question text in a read-only textarea */}
+      {/* Display the question text in a read-only textarea */}
+      
       <Editor className='userAnswer-editor'
         value={userAnswer}
         onValueChange={(code) => {
@@ -149,30 +145,26 @@ function CodeBlock() {
           }
         }}
         highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
-              // Highlight the syntax inside the editor using PrismJS
+        // Highlight the syntax inside the editor using PrismJS
         readOnly={role === "Mentor"}
-              // Make the editor read-only if the user is a Mentor
-        style={{
-          padding: "10px",
-        }}
+        // Make the editor read-only if the user is a Mentor
+        style={{ padding: "10px" }}
       />
-
 
       {role === "Student" && (
         <button className="answer-check" onClick={handleCheckAnswer}>
           Check My Answer
         </button>
-          // If the user is a Student, show a button to check their answer.
-
+        // If the user is a Student, show a button to check their answer.
       )}
       {role === "Mentor" && (
         <div className="students-codes-container">
-           <h2 className="students-title">Students Codes: </h2>
+          <h2 className="students-title">Students Codes: </h2>
           {Object.entries(studentsCodes).map(([id, code]) => (
             <div key={id} className="student-code-card">
               <h4> Student {id} </h4>
               <Editor
-              className="stuCode"
+                className="stuCode"
                 value={code}
                 highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
                 readOnly={true}
@@ -182,16 +174,15 @@ function CodeBlock() {
         </div>
       )}
 
-
       <div className="bottom-bar">
         <div className="user-counter">
-          Students Online: {studentsCount-1}
-              {/* Display the number of online students (excluding mentor) */}
+          Students Online: {studentsCount - 1}
+          {/* Display the number of online students (excluding mentor) */}
         </div>
         <button onClick={handleBackToLobby} className="lobby-button">
           Back to Lobby
         </button>
-          {/* Button to return to the lobby page */}
+        {/* Button to return to the lobby page */}
       </div>
     </div>
   );
