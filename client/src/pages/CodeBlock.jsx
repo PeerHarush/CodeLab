@@ -20,7 +20,9 @@ function CodeBlock() {
   const [showTryAgain, setShowTryAgain] = useState(false);
   const [role, setRole] = useState('');
   const [studentsCount, setStudentsCount] = useState(0);
-
+  const [studentsCodes, setStudentsCodes] = useState({});
+  const [studentId, setStudentId] = useState('');
+  
   useEffect(() => {
     async function fetchBlock() {
       const docRef = doc(db, "code_blocks", id);
@@ -49,7 +51,11 @@ function CodeBlock() {
       const data = JSON.parse(event.data);
 
       if (data.role) {
-        setRole(data.role === "mentor" ? "Mentor" : "Student");
+        if (data.role === "mentor") {
+          setRole("Mentor");
+        } else {
+          setRole("Student");
+        }
       }
 
       if (data.students !== undefined) {
@@ -59,6 +65,13 @@ function CodeBlock() {
       if (data.action === "mentor_left") {
         navigate('/');
       }
+      if (data.action === "update_all_codes") {
+        setStudentsCodes(data.codes || {});
+      }
+      if (data.student_id) {
+        setStudentId(data.student_id); 
+      }
+      
     };
 
     socket.onclose = () => {
@@ -115,7 +128,12 @@ function CodeBlock() {
       <textarea className="question-text" value={questionText} readOnly />
       <Editor className='userAnswer-editor'
         value={userAnswer}
-        onValueChange={code => setUserAnswer(code)}
+        onValueChange={(code) => {
+          setUserAnswer(code);
+          if (socket && role === "Student") {
+            socket.send(JSON.stringify({ action: "update_code", code, student_id: studentId }));
+          }
+        }}
         highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
         readOnly={role === "Mentor"}
         style={{
@@ -129,10 +147,27 @@ function CodeBlock() {
           Check My Answer
         </button>
       )}
+      {role === "Mentor" && (
+        <div className="students-codes-container">
+           <h2 className="students-title">Students Codes: </h2>
+          {Object.entries(studentsCodes).map(([id, code]) => (
+            <div key={id} className="student-code-card">
+              <h4> Student {id} </h4>
+              <Editor
+              className="stuCode"
+                value={code}
+                highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
+                readOnly={true}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
 
       <div className="bottom-bar">
         <div className="user-counter">
-          Users Online: {studentsCount-1}
+          Students Online: {studentsCount-1}
         </div>
         <button onClick={handleBackToLobby} className="lobby-button">
           Back to Lobby
