@@ -5,6 +5,10 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 import asyncio
 import json
+import os
+import json
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 app = FastAPI()
 
@@ -85,9 +89,15 @@ async def websocket_endpoint(websocket: WebSocket, code_block_id: str):
             await broadcast_students_count(code_block_id)
 
 # FIREBASE setup
-cred = credentials.Certificate("serviceAccountKey.json")
+
+
+# FIREBASE setup
+service_account_info = json.loads(os.environ['SERVICE_ACCOUNT_KEY'])
+cred = credentials.Certificate(service_account_info)
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+
 
 class AnswerRequest(BaseModel):
     question_name: str
