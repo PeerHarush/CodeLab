@@ -130,7 +130,7 @@ function CodeBlock() {
       <h1>Code Block: {currentBlock?.title}</h1>
       <h3>Role: {role}</h3>
 
-      {showSmiley && <img src="/smiley.png" alt="Correct!" className="smiley-image" />}
+      {showSmiley && <img src="/Smiley.png" alt="Correct!" className="smiley-image" />}
       {showTryAgain && <img src="/Mistake.png" alt="Try Again!" className="tryagain-image" />}
 
       <textarea className="question-text" value={questionText} readOnly />
