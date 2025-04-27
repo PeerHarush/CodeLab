@@ -73,9 +73,14 @@ Technologies Used
 ## Deployment
 The project is deployed using:
 - **Vercel** for the frontend (React)
-- **Railway.app** for the backend (FastAPI)
+- **render.com** for the backend (FastAPI)
 
-# 🎯 Submission
-- Frontend deployed: [Insert Vercel URL here]
-- Backend deployed: [Insert Railway or other server URL here]
-- GitHub repository: [Insert GitHub repo link here]
+## Important Note:
+The current solution checking mechanism matches the user's code **exactly** to the predefined correct answer.
+Therefore, alternative valid solutions might not be recognized as correct unless they match the stored solution.
+
+
+
+- Frontend deployed: https://code-lab-1.vercel.app/
+- Backend deployed: https://codelab-1-0fmm.onrender.com
+- GitHub repository: https://github.com/PeerHarush/CodeLab
