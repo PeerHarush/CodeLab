@@ -174,8 +174,6 @@ function CodeBlock() {
                 value={code}
                 highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
                 readOnly={true}
-                        {/* Show the student's code inside a read-only editor */}
-
               />
             </div>
           ))}
