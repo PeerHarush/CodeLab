@@ -2,7 +2,7 @@
   import React from 'react';
   import { useNavigate } from 'react-router-dom';
   import './Lobby.css';
-  import { collection, getDocs } from 'firebase/firestore';
+  import { collection, getDocs } from 'firebase/firestore'; // Import Firestore functions to retrieve data.
   import { useEffect, useState } from 'react';
   import db from '../firebase'; 
 
@@ -10,10 +10,11 @@
   function Lobby() {
     const [codeBlocks, setCodeBlocks] = useState([]); //יצירת משתנה שאליו ייכנסו השאלות 
     const navigate = useNavigate();
+  // Create a state variable to store the list of code blocks.
 
     useEffect(() => {
       async function fetchData() {
-        const querySnapshot = await getDocs(collection(db, "code_blocks")); //אובייקט שאליו נכנסים המסמכים שמביאים מהדאטה בייס שלנו 
+        const querySnapshot = await getDocs(collection(db, "code_blocks"));      // Fetch all documents from the "code_blocks" collection.
         const blocks = querySnapshot.docs.map(doc => {
           const data = doc.data();
           return {

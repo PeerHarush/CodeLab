@@ -7,23 +7,24 @@ import Editor from "react-simple-code-editor";
 import Prism from "prismjs";
 import "prismjs/themes/prism.css"; 
 import "prismjs/components/prism-javascript"; 
-
+// Import PrismJS for syntax highlighting inside the code editor.
 
 function CodeBlock() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [socket, setSocket] = useState(null);
-  const [currentBlock, setCurrentBlock] = useState(null);
-  const [questionText, setQuestionText] = useState('');
+  const [socket, setSocket] = useState(null);   // WebSocket connection.
+  const [currentBlock, setCurrentBlock] = useState(null); 
+  const [questionText, setQuestionText] = useState(''); 
   const [userAnswer, setUserAnswer] = useState('');
-  const [showSmiley, setShowSmiley] = useState(false);
+  const [showSmiley, setShowSmiley] = useState(false);   // Control showing a smiley image if the answer is correct.
   const [showTryAgain, setShowTryAgain] = useState(false);
   const [role, setRole] = useState('');
   const [studentsCount, setStudentsCount] = useState(0);
-  const [studentsCodes, setStudentsCodes] = useState({});
+  const [studentsCodes, setStudentsCodes] = useState({});   // Dictionary to store all students' code answers.
   const [studentId, setStudentId] = useState('');
   
   useEffect(() => {
+   // Fetching data and setting question data from Firestore when the page loads
     async function fetchBlock() {
       const docRef = doc(db, "code_blocks", id);
       const docSnap = await getDoc(docRef);
@@ -42,6 +43,7 @@ function CodeBlock() {
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8000/ws/${id}`);
     setSocket(socket);
+  // Open and save WebSocket connection to the server using the code block ID.
 
     socket.onopen = () => {
       console.log("Connected to WebSocket server");
@@ -51,6 +53,7 @@ function CodeBlock() {
       const data = JSON.parse(event.data);
 
       if (data.role) {
+                // Set the user role (Mentor or Student) based on the data received from the server.
         if (data.role === "mentor") {
           setRole("Mentor");
         } else {
@@ -61,9 +64,13 @@ function CodeBlock() {
       if (data.students !== undefined) {
         setStudentsCount(data.students);
       }
+            // Update the number of connected students.
+
 
       if (data.action === "mentor_left") {
         navigate('/');
+              // If the mentor left, navigate back to the lobby.
+
       }
       if (data.action === "update_all_codes") {
         setStudentsCodes(data.codes || {});
@@ -94,6 +101,8 @@ function CodeBlock() {
         user_code: userAnswer
       })
     });
+      // Send the user's answer to the server to check correctness.
+
 
     const data = await response.json();
 
@@ -101,6 +110,7 @@ function CodeBlock() {
       setShowSmiley(true);
       setShowTryAgain(false);
       setTimeout(() => setShowSmiley(false), 4000);
+          // Show a smiley for 4 seconds if correct.
     } else {
       setShowSmiley(false);
       setShowTryAgain(true);
@@ -111,6 +121,7 @@ function CodeBlock() {
   const handleBackToLobby = () => {
     if (role === "Mentor" && socket) {
       socket.send(JSON.stringify({ action: "mentor_left" }));
+          // If user is mentor, notify others before leaving.
       navigate('/');
     } else {
       navigate('/');
@@ -126,6 +137,7 @@ function CodeBlock() {
       {showTryAgain && <img src="/Mistake.png" alt="Try Again!" className="tryagain-image" />}
 
       <textarea className="question-text" value={questionText} readOnly />
+          {/* Display the question text in a read-only textarea */}
       <Editor className='userAnswer-editor'
         value={userAnswer}
         onValueChange={(code) => {
@@ -135,7 +147,9 @@ function CodeBlock() {
           }
         }}
         highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
+              // Highlight the syntax inside the editor using PrismJS
         readOnly={role === "Mentor"}
+              // Make the editor read-only if the user is a Mentor
         style={{
           padding: "10px",
         }}
@@ -146,6 +160,8 @@ function CodeBlock() {
         <button className="answer-check" onClick={handleCheckAnswer}>
           Check My Answer
         </button>
+          // If the user is a Student, show a button to check their answer.
+
       )}
       {role === "Mentor" && (
         <div className="students-codes-container">
@@ -158,6 +174,8 @@ function CodeBlock() {
                 value={code}
                 highlight={code => Prism.highlight(code, Prism.languages.javascript, 'javascript')}
                 readOnly={true}
+                        {/* Show the student's code inside a read-only editor */}
+
               />
             </div>
           ))}
@@ -168,10 +186,12 @@ function CodeBlock() {
       <div className="bottom-bar">
         <div className="user-counter">
           Students Online: {studentsCount-1}
+              {/* Display the number of online students (excluding mentor) */}
         </div>
         <button onClick={handleBackToLobby} className="lobby-button">
           Back to Lobby
         </button>
+          {/* Button to return to the lobby page */}
       </div>
     </div>
   );
