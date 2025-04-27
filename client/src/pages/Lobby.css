@@ -39,8 +39,15 @@
   font-size: 18px;
   background-color: #f5f5f5;
   font-family: monospace;
-
 }
+.userAnswer-editor textarea {
+  padding: 10px !important;
+  font-size: 18px;
+  font-family: monospace;
+  line-height: 1.5;
+}
+
+
 .students-codes-container {
   width: 300px;
   background-color: #ffffff;
@@ -50,15 +57,12 @@
   background-color: #f5f5f5;
   margin: 10px;
   padding-left: 10px;
-  padding-bottom: 10px;
 }
 .students-title{
   text-align: center;
 }
 
-.userAnswer-editor pre {
-  padding: 10px;
-}
+
 
 .bottom-bar {
   position: fixed;
